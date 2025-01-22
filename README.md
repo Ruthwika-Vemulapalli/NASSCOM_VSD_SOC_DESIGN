@@ -1,523 +1,239 @@
-# NASSCOM_VSD_SOC_DESIGN
-DIGITAL VLSI SOC DESIGN AND PLANNING
-SECTION-1: INCEPTION OF OPEN-SOURCE EDA,OpenLANE and Sky130PDK
-In an embedded board, the part of the board that is considered as chip is only the PACKAGE of the chip which is a protective layer or packet bound over the actual chip and the actual manufatured chip is usually present at the center of a package wherein, the connections from package is fed to the chip by WIRE BOUND method which represents basic wired connection.
-
-Inside the chip, all the signals from the external world to the chip and vice versa is passed through PADS. The area bound by the pads is CORE where all the digital logic of the chip is placed. Both the core and pads make up the DIE which is the basic manufacturing unit in regards to semiconductor chips
-
-FOUNDRY is the place where the semiconductor chips are manufactured and FOUNDRY IP's are Intellectual Properties based on a specific foundry and these IP's require a specific level of intelligence to be produced whereas, repeatable digital logic blocks are called MACROS.
-
-ISA (Intruction Set Architecture)
-A C program which has to be run on a specific hardware layout which is the interior of a chip in your laptop, there is certain flow to be followed.
-Initially, this particular C program is compiled in it's assembly language program which is nothing but RISC-V ISA (Reduced Instruction Set Compting - V Intruction Set Architecture).
-Following this, the assembly language program is then converted to machine language program which is the binary language logic 0 and 1 which is understood by the hardware of the computer.
-Directly after this, we've to implement this RISC-V specification using some RTL (a Hardware Description Language). Finally, from the RTL to Layout it is a standard PnR or RTL to GDSII flow.
-
-
-There are mainly 3 different parts in this course. They are:
-RISC-V ISA
-RTL and synthesis of RISC-V based CPU core - picorv32
-Physical design implementation of picorv32
-
-
-Open-source Implementation
-For open-source ASIC design implemantation, we require the following enablers to be readily available as open-source versions. They are:-
-RTL Designs
-EDA Tools
-PDK Data
-Initially in the early ages, the design and fabrication of IC's were tightly coupled and were only practiced by very few companies like TI, Intel, etc.
-In 1979, Lynn Conway and Carver Mead came up with an idea to saperate the design from the fabrication and to do this they inroduced structured design methodologies based on the λ-based design rules and published the first VLSI book "Introduction to VLSI System" which started the VLSI education.
-This methodology resulted in the emergence of the design only companies or "Fabless Companies" and fabrication only companies that we usually refer to as "Pure Play Fabs".
-The inteface between the designers and the fab by now became a set of data files and documents, that are reffered to as the "Process Design Kits (PDKs)".
-The PDK include but not limited to Device Models, Technology Information, Design Rules, Digital Standard Cell Libraries, I/O Libraries and many more.
-Since, the PDK contained variety of informations, and so they were distributed only under NDAs (Non-Disclosure Agreements) which made it in-accessible to the public.
-Recently, Google worked out an agreement with skywater to open-source the PDK for the 130nm process by skywater Technology, as a result on 30 June 2020 Google released the first ever open-source PDK.
-
-ASIC design is a complex step that involves tons of steps, various methodologies and respective EDA tools which are all required for successful ASIC implementation which is achieved though an ASIC flow which is nothing but a piece of software that pulls different tools togather to carry out the design process.
-
-OpenLANE Open-source ASIC Design Implementation Flow
-The main objective of the ASIC Design Flow is to take the design from the RTL (Register Transfer Level) all the way to the GDSII, which is the format used for the final fabrication layout.
-
-Synthesis is the process of convertion or translation of design RTL into circuits made out of Standard Cell Libraries (SCL) the resultant circuit is described in HDL and is usually reffered to as the Gate-Level Netlist.
-Gate-Level Netlist is functionally equivalent to the RTL.
-The fundemental building blocks which are the standard cells have regular layouts.
-Each cell has different views/models which are utilised by different EDA tools like liberty view with electrical models of the cells, HDL behavioral models, SPICE or CDL views of the cells, Layout view which include GDSII view which is the detailed view and LEF view which is the abstract view
-
-IMPLEMENTATION:
-1. Run 'picorv32a' design synthesis using OpenLANE flow and generate necessary outputs.
-2. Calculate the flop ratio.
-   Flop Ratio = (No of D Flip Flops)/(Total number of cells)
-   Percentage of DFF's= Flop Ratio*100
-
-Run 'picorv32a' design synthesis using OpenLANE flow and generate necessary outputs.
-Commands to invoke the OpenLANE flow and perform synthesis:
-
-# Change directory to openlane flow directory
-cd Desktop/work/tools/openlane_working_dir/openlane
-
-# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
-# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
-docker
-# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
-./flow.tcl -interactive
-
-# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
-package require openlane 0.9
-
-# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
-prep -design picorv32a
-
-# Now that the design is prepped and ready, we can run synthesis using following command
-run_synthesis
-
-# Exit from OpenLANE flow
-exit
-
-# Exit from OpenLANE flow docker sub-system
-exit
-
-
-
-
-
-
-
-
-
-
-
-
-Calculation of Flop Ratio and DFF % from synthesis statistics report file
-Flop Ratio = 1613/14876 = 0.1084296
-Percentage of DFF's = 0.108429685*100 = 10.84296%
-
-Section 2 - Floorplan and Introduction to library cells
-
-Implementation
-Section 2 tasks:-
-
-Run 'picorv32a' design floorplan using OpenLANE flow and generate necessary outputs.
-Calculate the die area in microns from the values in floorplan def.
-Load generated floorplan def in magic tool and explore the floorplan.
-Run 'picorv32a' design congestion aware placement using OpenLANE flow and generate necessary outputs.
-Load generated placement def in magic tool and explore the placement.
- Area of die in microns = (Die width in microns)*(Die height in microns)
-
- 1. Run 'picorv32a' design floorplan using OpenLANE flow and generate necessary outputs.
-Commands to invoke the OpenLANE flow and perform floorplan
-# Change directory to openlane flow directory
-cd Desktop/work/tools/openlane_working_dir/openlane
-
-# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
-# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
-docker
-
-# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
-./flow.tcl -interactive
-
-# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
-package require openlane 0.9
-
-# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
-prep -design picorv32a
-
-# Now that the design is prepped and ready, we can run synthesis using following command
-run_synthesis
-
-# Now we can run floorplan
-run_floorplan
-
-According to floorplan def
-
-1000 Unit Distance = 1 Micron
-
-Die width in unit distance = 660685-0 = 660685
-
-Die height in unit distance = 671405-0671405
-
-Distance in microns = Die width in microns = Value in Unit Distance 1000 A 660.685 Місrons 660685 1000
-
-Die height in microns 671405 1000 = 671.405 Microns
-
-Area of die in microns = 660.685*671.405 = 443587.212425 Square Microns
-
-3. Load generated floorplan def in magic tool and explore the floorplan.
-Commands to load floorplan def in magic in another terminal
-# Change directory to path containing generated floorplan def
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/17-03_12-06/results/floorplan/
-
-# Command to load the floorplan def in magic tool
-magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-4. Run 'picorv32a' design congestion aware placement using OpenLANE flow and generate necessary outputs.
-Command to run placement
-# Congestion aware placement by default
-run_placement
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Section 3 - Design library cell using Magic Layout and ngspice characterization
-Implementation
-Section 3 tasks:-
-Clone custom inverter standard cell design from github repository Standard cell design and characterization using OpenLANE flow.
-Load the custom inverter layout in magic and explore.
-Spice extraction of inverter in magic.
-Editing the spice model file for analysis through simulation.
-Post-layout ngspice simulations.
-Find problem in the DRC section of the old magic tech file for the skywater process and fix them.
-1. Clone custom inverter standard cell design from github repository
-
-# Change directory to openlane
-cd Desktop/work/tools/openlane_working_dir/openlane
-
-# Clone the repository with custom inverter design
-git clone https://github.com/nickson-jose/vsdstdcelldesign
-
-# Change into repository directory
-cd vsdstdcelldesign
-
-# Copy magic tech file to the repo directory for easy access
-cp /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech .
-
-# Check contents whether everything is present
-ls
-
-# Command to open custom inverter layout in magic
-magic -T sky130A.tech sky130_inv.mag &
-
-2. Load the custom inverter layout in magic and explore.
-
-
-
-
-
-
-
-
-
-
-3. Spice extraction of inverter in magic.
-Commands for spice extraction of the custom inverter layout to be used in tkcon window of magic
-
-
-# Check current directory
-pwd
-
-# Extraction command to extract to .ext format
-extract all
-
-# Before converting ext to spice this command enable the parasitic extraction also
-ext2spice cthresh 0 rthresh 0
-
-# Converting to ext to spice
-ext2spice
-
-
-
-4. Editing the spice model file for analysis through simulation.
-Measuring unit distance in layout grid
-
-
-
-
-
-
-
-
-
-5. Post-layout ngspice simulations.
-Commands for ngspice simulation
-
-# Command to directly load spice file for simulation to ngspice
-ngspice sky130_inv.spice
-
-# Now that we have entered ngspice with the simulation spice file loaded we just have to load the plot
-plot y vs time a
-
-Rise transition time calculation
-Rise transition time = Time taken for output to rise to 80% - Time taken for output to rise to 20%
-
-20% of output = 660 mV
-80% of output = 2.64 V
-
-
-
-Fall transition time = 4.0955 - 4.0536 = 0.0419 ns = 41.9 ps
-Rise Cell Delay Calculation
-Rise Cell Delay: Time taken for output to rise to 50% - Time taken for input to fall to 50%
- 50% of 3.3V = 1.65V
-
- Fall Cell Delay: Time taken for output to fall to 50% - Time taken for input to rise to 50%
- 50% of 3.3V = 1.65V
- Fall Cell Delay =4.07 - 4.05 =0.02 ns =20ps
-
- Commands to download and view the corrupted skywater process magic tech file and associated files to perform drc corrections
-
- # Change to home directory
-cd
-
-# Command to download the lab files
-wget http://opencircuitdesign.com/open_pdks/archive/drc_tests.tgz
-
-# Since lab file is compressed command to extract it
-tar xfz drc_tests.tgz
-
-# Change directory into the lab folder
-cd drc_tests
-
-# List all files and directories present in the current directory
-ls -al
-
-# Command to view .magicrc file
-gvim .magicrc
-
-# Command to open magic tool in better graphics
-magic -d XR &
-
-
- 
-
-
- Section 4 - Pre-layout timing analysis and importance of good clock tree
- Fix up small DRC errors and verify the design is ready to be inserted into our flow.
-Save the finalized layout with custom name and open it.
-Generate lef from the layout.
-Copy the newly generated lef and associated required lib files to 'picorv32a' design 'src' directory.
-Edit 'config.tcl' to change lib file and add the new extra lef into the openlane flow.
-Run openlane flow synthesis with newly inserted custom inverter cell.
-Remove/reduce the newly introduced violations with the introduction of custom inverter cell by modifying design parameters.
-Once synthesis has accepted our custom inverter we can now run floorplan and placement and verify the cell is accepted in PnR flow.
-Do Post-Synthesis timing analysis with OpenSTA tool.
-Make timing ECO fixes to remove all violations.
-Replace the old netlist with the new netlist generated after timing ECO fix and implement the floorplan, placement and cts.
-Post-CTS OpenROAD timing analysis.
-Explore post-CTS OpenROAD timing analysis by removing 'sky130_fd_sc_hd__clkbuf_1' cell from clock buffer list variable 'CTS_CLK_BUFFER_LIST'.
-
-
-1. Fix up small DRC errors and verify the design is ready to be inserted into our flow.
-Conditions to be verified before moving forward with custom designed cell layout:
-
-Condition 1: The input and output ports of the standard cell should lie on the intersection of the vertical and horizontal tracks.
-Condition 2: Width of the standard cell should be odd multiples of the horizontal track pitch.
-Condition 3: Height of the standard cell should be even multiples of the vertical track pitch.
-
-
-Commands to open the custom inverter layout
-# Change directory to vsdstdcelldesign
-cd Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign
-
-# Command to open custom inverter layout in magic
-magic -T sky130A.tech sky130_inv.mag &
-
-Commands for tkcon window to set grid as tracks of locali layer
-# Get syntax for grid command
-help grid
-
-# Set grid values accordingly
-grid 0.46um 0.34um 0.23um 0.17um
-
-
-2. Save the finalized layout with custom name and open it.
-Command for tkcon window to save the layout with custom name
-# Command to save as
-save sky130_vsdinv.mag
-
-Command to open the newly saved layout
-# Command to open custom inverter layout in magic
-magic -T sky130A.tech sky130_vsdinv.mag &
-
-
-3. Generate lef from the layout.
-Command for tkcon window to write lef
-
-# lef command
-lef write
-
-4. Copy the newly generated lef and associated required lib files to 'picorv32a' design 'src' directory.
-Commands to copy necessary files to 'picorv32a' design 'src' directory
-
-
-# Copy lef file
-cp sky130_vsdinv.lef ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
-
-# List and check whether it's copied
-ls ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
-
-# Copy lib files
-cp libs/sky130_fd_sc_hd__* ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
-
-# List and check whether it's copied
-ls ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
-
-
-5. Edit 'config.tcl' to change lib file and add the new extra lef into the openlane flow.
-Commands to be added to config.tcl to include our custom cell in the openlane flow
-
-
-set ::env(LIB_SYNTH) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
-set ::env(LIB_FASTEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__fast.lib"
-set ::env(LIB_SLOWEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__slow.lib"
-set ::env(LIB_TYPICAL) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
-
-set ::env(EXTRA_LEFS) [glob $::env(OPENLANE_ROOT)/designs/$::env(DESIGN_NAME)/src/*.lef]
-
-
-6. Run openlane flow synthesis with newly inserted custom inverter cell.
-Commands to invoke the OpenLANE flow include new lef and perform synthesis
-
-# Change directory to openlane flow directory
-cd Desktop/work/tools/openlane_working_dir/openlane
-
-# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
-# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
-docker
-
-# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
-./flow.tcl -interactive
-
-# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
-package require openlane 0.9
-
-# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
-prep -design picorv32a
-
-# Adiitional commands to include newly added lef to openlane flow
-set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
-add_lefs -src $lefs
-
-# Now that the design is prepped and ready, we can run synthesis using following command
-run_synthesis
-
-7. Remove/reduce the newly introduced violations with the introduction of custom inverter cell by modifying design parameters.
-
-Commands to view and change parameters to improve timing and run synthesis
-# Now once again we have to prep design so as to update variables
-prep -design picorv32a -tag 24-03_10-03 -overwrite
-
-# Addiitional commands to include newly added lef to openlane flow merged.lef
-set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
-add_lefs -src $lefs
-
-# Command to display current value of variable SYNTH_STRATEGY
-echo $::env(SYNTH_STRATEGY)
-
-# Command to set new value for SYNTH_STRATEGY
-set ::env(SYNTH_STRATEGY) "DELAY 3"
-
-# Command to display current value of variable SYNTH_BUFFERING to check whether it's enabled
-echo $::env(SYNTH_BUFFERING)
-
-# Command to display current value of variable SYNTH_SIZING
-echo $::env(SYNTH_SIZING)
-
-# Command to set new value for SYNTH_SIZING
-set ::env(SYNTH_SIZING) 1
-
-# Command to display current value of variable SYNTH_DRIVING_CELL to check whether it's the proper cell or not
-echo $::env(SYNTH_DRIVING_CELL)
-
-# Now that the design is prepped and ready, we can run synthesis using following command
-run_synthesis
-
-8. Once synthesis has accepted our custom inverter we can now run floorplan and placement and verify the cell is accepted in PnR flow.
-Since we are facing unexpected un-explainable error while using run_floorplan command, we can instead use the following set of commands available based on information from Desktop/work/tools/openlane_working_dir/openlane/scripts/tcl_commands/floorplan.tcl and also based on Floorplan Commands section in Desktop/work/tools/openlane_working_dir/openlane/docs/source/OpenLANE_commands.md
-# Follwing commands are alltogather sourced in "run_floorplan" command
-init_floorplan
-place_io
-tap_decap_or
-Now that floorplan is done we can do placement using following command
-# Now we are ready to run placement
-run_placement
-
-Commands to load placement def in magic in another terminal
-# Change directory to path containing generated placement def
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/24-03_10-03/results/placement/
-
-# Command to load the placement def in magic tool
-magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
-
-Command for tkcon window to view internal layers of cells
-
-# Command to view internal connectivity layers
-expand
-
-
-9. Do Post-Synthesis timing analysis with OpenSTA tool.
-Since we are having 0 wns after improved timing run we are going to do timing analysis on initial run of synthesis which has lots of violations and no parameters were added to improve timing
-
-Commands to invoke the OpenLANE flow include new lef and perform synthesis
-
-# Change directory to openlane flow directory
-cd Desktop/work/tools/openlane_working_dir/openlane
-
-# alias docker='docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) efabless/openlane:v0.21'
-# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
-docker
-
-# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
-./flow.tcl -interactive
-
-# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
-package require openlane 0.9
-
-# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
-prep -design picorv32a
-
-# Adiitional commands to include newly added lef to openlane flow
-set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
-add_lefs -src $lefs
-
-# Command to set new value for SYNTH_SIZING
-set ::env(SYNTH_SIZING) 1
-
-# Now that the design is prepped and ready, we can run synthesis using following command
-run_synthesis
-
-
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
+# Variables information
+
+This page describes configuration variables and their default values.
+
+## Required variables
+
+| Variable      | Description                                           |
+|---------------|-------------------------------------------------------|
+| `DESIGN_NAME`   | The name of the top level module of the design        |
+| `VERILOG_FILES` | The path of the design's verilog files |
+| `CLOCK_PERIOD`  | The clock period for the design in ns       |
+| `CLOCK_NET` | The name of the Net input to root clock buffer used in Clock Tree Synthesis. |
+| `CLOCK_PORT`    | The name of the design's clock port used in Static Timing Analysis.   |
+
+## Optional variables
+
+These variables are optional that can be specified in the design configuration file.
+
+### Synthesis
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `LIB_SYNTH` | The library used for synthesis by yosys. <br> (Default: `$::env(PDK_ROOT)/$::env(PDK)/libs.ref/$::env(STD_CELL_LIBRARY)/lib/sky130_fd_sc_hd__tt_025C_1v80.lib`)|
+| `SYNTH_BIN` | The yosys binary used in the flow. <br> (Default: `yosys`) |
+| `SYNTH_DRIVING_CELL`  | The cell to drive the input ports. <br>(Default: `sky130_fd_sc_hd__inv_8`)|
+| `SYNTH_DRIVING_CELL_PIN`  | The name of the SYNTH_DRIVING_CELL output pin. <br>(Default: `Y`)|
+| `SYNTH_CAP_LOAD` | The capacitive load on the output ports in femtofarads. <br> (Default: `17.65` ff)|
+| `SYNTH_MAX_FANOUT`  | The max load that the output ports can drive. <br> (Default: `5` cells) |
+| `SYNTH_MAX_TRAN` | The max transition time (slew) from high to low or low to high on cell inputs in ns. Used in synthesis <br> (Default: Calculated at runtime as `10%` of the provided clock period, unless this exceeds a set DEFAULT_MAX_TRAN, in which case it will be used as is). |
+| `SYNTH_STRATEGY` | Strategies for abc logic synthesis and technology mapping <br> Possible values are `DELAY/AREA 0-3/0-2`; the first part refers to the optimization target of the synthesis strategy (area vs. delay) and the second one is an index. <br> (Default: `AREA 0`)|
+| `SYNTH_BUFFERING` | Enables abc cell buffering <br> Enabled = 1, Disabled = 0 <br> (Default: `1`)|
+| `SYNTH_SIZING` | Enables abc cell sizing (instead of buffering) <br> Enabled = 1, Disabled = 0 <br> (Default: `0`)|
+| `SYNTH_READ_BLACKBOX_LIB` | A flag that enable reading the full(untrimmed) liberty file as a blackbox for synthesis. Please note that this is not used in technology mapping. This should only be used when trying to preserve gate instances in the rtl of the design.  <br> Enabled = 1, Disabled = 0 <br> (Default: `0`)|
+| `SYNTH_NO_FLAT` | A flag that disables flattening the hierarchy during synthesis, only flattening it after synthesis, mapping and optimizations. <br> Enabled = 1, Disabled = 0 <br> (Default: `0`)|
+| `SYNTH_SHARE_RESOURCES` | A flag that enables yosys to reduce the number of cells by determining shareable resources and merging them. <br> Enabled = 1, Disabled = 0 <br> (Default: `1`)|
+| `SYNTH_ADDER_TYPE` | Adder type to which the $add and $sub operators are mapped to. <br> Possible values are `YOSYS/FA/RCA/CSA`; where `YOSYS` refers to using Yosys internal adder definition, `FA` refers to full-adder structure, `RCA` refers to ripple carry adder structure, and `CSA` refers to carry select adder. <br> (Default: `YOSYS`)|
+| `LIB_SLOWEST` | Points to the lib file, corresponding to the slowest corner, for max delay calculation during STA. <br> (Default: `$::env(PDK_ROOT)/$::env(PDK)/libs.ref/$::env(STD_CELL_LIBRARY)/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib`) |
+| `LIB_FASTEST` | Points to the lib file, corresponding to the fastest corner, for min delay calculation during STA. <br> (Default: `$::env(PDK_ROOT)/$::env(PDK)/libs.ref/$::env(STD_CELL_LIBRARY)/lib/sky130_fd_sc_hd__ss_100C_1v60.lib`) |
+| `LIB_TYPICAL` | Library used for typical delay calculation during STA. <br> (Default`LIB_SYNTH`) |
+| `CLOCK_BUFFER_FANOUT` | Fanout of clock tree buffers. <br> (Default: `16`) |
+| `ROOT_CLK_BUFFER` | Root clock buffer of the clock tree. <br> (Default: `sky130_fd_sc_hd__clkbuf_16`) |
+| `CLK_BUFFER` | Clock buffer used for inner nodes of the clock tree. <br> (Default: `sky130_fd_sc_hd__clkbuf_4`) |
+| `CLK_BUFFER_INPUT` | Input pin of the clock tree buffer. <br> (Default: `A`) |
+| `CLK_BUFFER_OUTPUT` | Output pin of the clock tree buffer. <br> (Default: `X`) |
+| `BASE_SDC_FILE` | Specifies the base sdc file to source before running Static Timing Analysis. <br> (Default: `$::env(OPENLANE_ROOT)/scripts/base.sdc`) |
+| `VERILOG_INCLUDE_DIRS` | Specifies the verilog includes directories. <br> Optional. |
+| `SYNTH_FLAT_TOP` | Specifies whether or not the top level should be flattened during elaboration. 1 = True, 0= False <br> Default: `0`. |
+| `IO_PCT` | Specifies the percentage of the clock period used in the input/output delays. Ranges from 0 to 1.0. <br> (Default: `0.2`) |
+
+### Floorplanning
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `FP_CORE_UTIL`  | The core utilization percentage. <br> (Default: `50` percent)|
+| `FP_ASPECT_RATIO`  | The core's aspect ratio (height / width). <br> (Default: `1`)|
+| `FP_SIZING`  | Whether to use relative sizing by making use of `FP_CORE_UTIL` or absolute one using `DIE_AREA`. <br> (Default: `"relative"` - accepts "absolute" as well)|
+| `DIE_AREA`  | Specific die area to be used in floorplanning. Specified as a 4-corner rectangle. Units in mm <br> (Default: unset)|
+| `FP_IO_HMETAL`  | The metal layer on which to place the io pins horizontally (top and bottom of the die). <br>(Default: `4`)|
+| `FP_IO_VMETAL`  | The metal layer on which to place the io pins vertically (sides of the die) <br> (Default: `3`)|
+| `FP_IO_MODE`  | Decides the mode of the random IO placement option. 0=matching mode, 1=random equidistant mode <br> (Default: `1`)|
+| `FP_WELLTAP_CELL`  | The name of the welltap cell during welltap insertion. |
+| `FP_ENDCAP_CELL`  | The name of the endcap cell during endcap insertion. |
+| `FP_PDN_VOFFSET`  | The offset of the vertical power stripes on the metal layer 4 in the power distribution network <br> (Default: `16.32`) |
+| `FP_PDN_VPITCH`  | The pitch of the vertical power stripes on the metal layer 4 in the power distribution network <br> (Default: `153.6`) |
+| `FP_PDN_HOFFSET`  | The offset of the horizontal power stripes on the metal layer 5 in the power distribution network <br> (Default: `16.65`) |
+| `FP_PDN_HPITCH`  | The pitch of the horizontal power stripes on the metal layer 5 in the power distribution network <br> (Default: `153.18`) |
+| `FP_PDN_AUTO_ADJUST` | Decides whether or not the flow should attempt to re-adjust the power grid, in order for it to fit inside the core area of the design, if needed. <br> 1=enabled, 0 =disabled (Default: `1`) |
+| `FP_TAPCELL_DIST`  | The horizontal distance between two tapcell columns <br> (Default: `14`) |
+| `FP_IO_VEXTEND`  |  Extends the vertical io pins outside of the die by the specified units<br> (Default: `-1` Disabled) |
+| `FP_IO_HEXTEND`  |  Extends the horizontal io pins outside of the die by the specified units<br> (Default: `-1` Disabled) |
+| `FP_IO_VLENGTH`  | The length of the vertical IOs in microns. <br> (Default: `4`) |
+| `FP_IO_HLENGTH`  | The length of the horizontal IOs in microns. <br> (Default: `4`) |
+| `FP_IO_VTHICKNESS_MULT`  | A multiplier for vertical pin thickness. Base thickness is the pins layer minwidth <br> (Default: `2`) |
+| `FP_IO_HTHICKNESS_MULT`  | A multiplier for horizontal pin thickness. Base thickness is the pins layer minwidth <br> (Default: `2`) |
+| `BOTTOM_MARGIN_MULT`     | The core margin, in multiples of site heights, from the bottom boundary. <br> (Default: `4`) |
+| `TOP_MARGIN_MULT`        | The core margin, in multiples of site heights, from the top boundary. <br> (Default: `4`) |
+| `LEFT_MARGIN_MULT`       | The core margin, in multiples of site widths, from the left boundary.  <br> (Default: `12`) |
+| `RIGHT_MARGIN_MULT`      | The core margin, in multiples of site widths, from the right boundary.   <br> (Default: `12`) |
+| `FP_PDN_CORE_RING` | Enables adding a core ring around the design. More details on the control variables in the pdk configurations documentation. 0=Disable 1=Enable. <br> (Default: `0`) |
+| `FP_PDN_ENABLE_RAILS` | Enables the creation of rails in the power grid. 0=Disable 1=Enable. <br> (Default: `1`) |
+| `FP_PDN_CHECK_NODES` | Enables checking for unconnected nodes in the power grid. 0=Disable 1=Enable. <br> (Default: `1`) |
+| `FP_HORIZONTAL_HALO` | Sets the horizontal halo around the tap and decap cells. The value provided is in microns. <br> Default: `10` |
+| `FP_VERTICAL_HALO` | Sets the vertical halo around the tap and decap cells. The value provided is in microns. <br> Default: set to the value of `FP_HORIZONTAL_HALO` |
+| `DESIGN_IS_CORE` | Controls the layers used in the power grid. Depending on whether the design is the core of the chip or a macro inside the core. 1=Is a Core, 0=Is a Macro <br> (Default: `1`)|
+| `FP_PIN_ORDER_CFG` | Points to the pin order configuration file to set the pins in specific directions (S, W, E, N). Check this [file][0] as an example. If not set, then the IO pins will be placed based on one of the other methods depending on the rest of the configurations. <br> (Default: NONE)|
+| `FP_CONTEXT_DEF` | Points to the parent DEF file that includes this macro/design and uses this DEF file to determine the best locations for the pins. It must be used with `FP_CONTEXT_LEF`, otherwise it's considered non-existing. If not set, then the IO pins will be placed based on one of the other methods depending on the rest of the configurations. <br> (Default: NONE)|
+| `FP_CONTEXT_LEF` | Points to the parent LEF file that includes this macro/design and uses this LEF file to determine the best locations for the pins. It must be used with `FP_CONTEXT_DEF`, otherwise it's considered non-existing. If not set, then the IO pins will be placed based on one of the other methods depending on the rest of the configurations. <br> (Default: NONE)|
+| `FP_DEF_TEMPLATE` | Points to the DEF file to be used as a template when running `apply_def_template`. This will be used to exctract pin names, locations, shapes -excluding power and ground pins- as well as the die area and replicate all this information in the `CURRENT_DEF`. |
+| `VDD_NETS` | Specifies the power nets/pins to be used when creating the power grid for the design. |
+| `GND_NETS` | Specifies the ground nets/pins to be used when creating the power grid for the design. |
+| `SYNTH_USE_PG_PINS_DEFINES` | Specifies the power guard used in the verilog source code to specify the power and ground pins. This is used to automatically extract `VDD_NETS` and `GND_NET` variables from the verilog, with the assumption that they will be order `inout vdd1, inout gnd1, inout vdd2, inout gnd2, ...`. |
+
+### Placement
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `PL_TARGET_DENSITY` | The desired placement density of cells. It reflects how spread the cells would be on the core area. 1 = closely dense. 0 = widely spread <br> (Default: `0.55`)|
+| `PL_TIME_DRIVEN` | Specifies whether the placer should use time driven placement. 0 = false, 1 = true <br> (Default: `0`)|
+| `PL_LIB` | Specifies the library for time driven placement <br> (Default: `LIB_TYPICAL`)|
+| `PL_BASIC_PLACEMENT` | Specifies whether the placer should run basic placement or not (by running initial placement, increasing the minimum overflow to 0.9, and limiting the number of iterations to 20). 0 = false, 1 = true <br> (Default: `0`) |
+| `PL_SKIP_INITIAL_PLACEMENT` | Specifies whether the placer should run initial placement or not. 0 = false, 1 = true <br> (Default: `0`) |
+| `PL_RANDOM_GLB_PLACEMENT` | Specifies whether the placer should run random placement or not. This is useful if the design is tiny (less than 100 cells). 0 = false, 1 = true <br> (Default: `0`) |
+| `PL_RANDOM_INITIAL_PLACEMENT` | Specifies whether the placer should run random placement or not followed by replace's initial placement. This is useful if the design is tiny (less than 100 cells). 0 = false, 1 = true <br> (Default: `0`) |
+| `PL_ROUTABILITY_DRIVEN` | Specifies whether the placer should use routability driven placement. 0 = false, 1 = true <br> (Default: `0`) |
+| `PL_OPENPHYSYN_OPTIMIZATIONS` | Specifies whether OpenPhySyn should be used to perform timing optimizations or not. 0 = false, 1 = true <br> (Default: `0`) |
+| `PSN_ENABLE_RESIZING` | Enables driver resizing by OpenPhySyn. 0 = Disabled, 1 = Enabled <br> (Default: `1`)|
+| `PSN_ENABLE_PIN_SWAP` | Enables pin swapping for timing optimization by OpenPhySyn. 0 = Disabled, 1 = Enabled <br> (Default: `1`)|
+| `PL_RESIZER_DESIGN_OPTIMIZATIONS` | Specifies whether resizer design optimizations should be performed or not. 0 = false, 1 = true <br> (Default: `1`) |
+| `PL_RESIZER_TIMING_OPTIMIZATIONS` | Specifies whether resizer timing optimizations should be performed or not. 0 = false, 1 = true <br> (Default: `1`) |
+| `PL_RESIZER_MAX_WIRE_LENGTH` | Specifies the maximum wire length cap used by resizer to insert buffers. If set to 0, no buffers will be inserted. Value in microns. <br> (Default: `0`)|
+| `LIB_OPT` | Points to the lib file, corresponding to the slowest corner, for max delay calculation during OpenPhySyn optimizations. This is usually a trimmed version of `LIB_SLOWEST`. <br> Default: `$::env(TMP_DIR)/opt.lib` |
+| `LIB_RESIZER_OPT` | Points to the lib file, corresponding to the slowest corner, for max delay calculation during resizer optimizations. This is copy of `LIB_SLOWEST`. <br> Default: `$::env(TMP_DIR)/resizer.lib` |
+| `DONT_USE_CELLS` | The list of cells to not use during resizer optimizations. <br> Default: the contents of `DRC_EXCLUDE_CELL_LIST`. |
+| `PL_ESTIMATE_PARASITICS` | Specifies whether or not to run STA after global placement using OpenROAD's estimate_parasitics -placement and generates reports under `logs/placement`. 1 = Enabled, 0 = Disabled. <br> (Default: `1`) |
+| `PL_DIAMOND_SEARCH_HEIGHT` | Specifies the diamond search height used for legalizing the cells during detailed placement. The search width is calculated internally as `heigh*5`. For designs that contain big macros, increasing this value to above 400 will allow for more search space and more potentail for successful legalization. <br> (Default: `100`) |
+| `PL_OPTIMIZE_MIRRORING` | Specifies whether or not to run an optimize_mirroring pass whenever detailed placement happens. This pass will mirror the cells whenever possible to optimize the design. 1 = Enabled, 0 = Disabled. <br> (Default: `1`) |
+| `PL_RESIZER_BUFFER_INPUT_PORTS` | Specifies whether or not to insert buffers on input ports whenever resizer optimizations are run. For this to be used, `PL_RESIZER_DESIGN_OPTIMIZATIONS` must be set to 1. 1 = Enabled, 0 = Disabled. <br> (Default: `1`) |
+| `PL_RESIZER_BUFFER_OUTPUT_PORTS` | Specifies whether or not to insert buffers on output ports whenever resizer optimizations are run. For this to be used, `PL_RESIZER_DESIGN_OPTIMIZATIONS` must be set to 1. 1 = Enabled, 0 = Disabled. <br> (Default: `1`) |
+
+### CTS
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `CTS_TARGET_SKEW` | The target clock skew in picoseconds. <br> (Default: `200` ps)|
+| `CTS_ROOT_BUFFER`| The name of cell inserted at the root of the clock tree. |
+| `CLOCK_TREE_SYNTH` | Enable clock tree synthesis for tirtonCTS. <br> (Default: `1`)|
+| `CTS_TOLERANCE` | An integer value that represents a tradeoff of QoR and runtime. Higher values will produce smaller runtime but worse QoR <br> (Default: `100`) |
+| `CTS_SINK_CLUSTERING_SIZE` | Specifies the maximum number of sinks per cluster. <br> (Default: `20`) |
+| `CTS_SINK_CLUSTERING_MAX_DIAMETER` | Specifies maximum diameter (in micron) of sink cluster. <br> (Default: `50`) |
+| `CTS_REPORT_TIMING` | Specifies whether or not to run STA after clock tree synthesis using OpenROAD's estimate_parasitics -placement and generates reports under `logs/cts`. 1 = Enabled, 0 = Disabled. <br> (Default: `1`) |
+| `LIB_CTS` | The liberty file used for CTS. By default, this is the `LIB_SYNTH_COMPLETE` minus the cells with drc errors as specified by the drc exclude list. <br> (Default: `$::env(TMP_DIR)/cts.lib`) |
+
+### Routing
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `GLB_RT_MINLAYER` | The number of lowest layer to be used in routing. <br> (Default: `1`)|
+| `GLB_RT_MAXLAYER` | The number of highest layer to be used in routing. <br> (Default: `6`)|
+| `GLB_RT_ADJUSTMENT` | Reduction in the routing capacity of the edges between the cells in the global routing graph. Values range from 0 to 1. <br> 1 = most reduction, 0 = least reduction  <br> (Default: `0`)|
+| `GLB_RT_L1_ADJUSTMENT` | Reduction in the routing capacity of the edges between the cells in the global routing graph but specific to li1 layer in sky130A. Values range from 0 to 1 <br> (Default: `0.99`) |
+| `GLB_RT_L2_ADJUSTMENT` | Reduction in the routing capacity of the edges between the cells in the global routing graph but specific to met1 in sky130A. Values range from 0 to 1 <br> (Default: `0`) |
+| `GLB_RT_L3_ADJUSTMENT` | Reduction in the routing capacity of the edges between the cells in the global routing graph but specific to met2 in sky130A. Values range from 0 to 1 <br> (Default: `0`) |
+| `GLB_RT_L4_ADJUSTMENT` | Reduction in the routing capacity of the edges between the cells in the global routing graph but specific to met3 in sky130A. Values range from 0 to 1 <br> (Default: `0`) |
+| `GLB_RT_L5_ADJUSTMENT` | Reduction in the routing capacity of the edges between the cells in the global routing graph but specific to met4 in sky130A. Values range from 0 to 1 <br> (Default: `0`) |
+| `GLB_RT_L6_ADJUSTMENT` | Reduction in the routing capacity of the edges between the cells in the global routing graph but specific to met5 in sky130A. Values range from 0 to 1 <br> (Default: `0`) |
+| `GLB_RT_UNIDIRECTIONAL` | Allow unidirectional routing. 0 = false, 1 = true <br> (Default: `1`) |
+| `GLB_RT_ALLOW_CONGESTION` | Allow congestion in the resultign guides. 0 = false, 1 = true <br> (Default: `0`) |
+| `GLB_RT_OVERFLOW_ITERS` | The maximum number of iterations waiting for the overflow to reach the desired value. <br> (Default: `50`) |
+| `GLB_RT_TILES` | The size of the GCELL used by Fastroute during global routing. <br> (Default: `15`) |
+| `GLB_RT_ESTIMATE_PARASITICS` | Specifies whether or not to run STA after global routing using OpenROAD's estimate_parasitics -global_routing and generates reports under `logs/routing`. 1 = Enabled, 0 = Disabled. <br> (Default: `1`) |
+| `ROUTING_CORES` | Specifies the number of threads to be used in TritonRoute. <br> (Default: `4`) |
+| `GLB_RT_MAX_DIODE_INS_ITERS` | Controls the maximum number of iterations at which re-running Fastroute for diode insertion stops. Each iteration ARC detects the violations and FastRoute fixes them by inserting diodes, then producing the new DEF. The number of antenna violations is compared with the previous iteration and if they are equal or the number is greater the iterations stop and the DEF from the previous iteration is used in the rest of the flow. If the current antenna violations reach zero, the current def will be used and the iterations will not continue. This option is only available in DIODE_INSERTION_STRATEGY = `3`.  <br> (Default: `1`) |
+| `GLB_RT_OBS` | Specifies custom obstruction to be added prior to global routing. Comma separated list of layer and coordinates: `layer llx lly urx ury`.<br> (Example: `li1 0 100 1000 300, met5 0 0 1000 500`)  <br> (Default: unset) |
+| `ROUTING_OPT_ITERS` | Specifies the maximum number of optimization iterations during Detailed Routing in TritonRoute. <br> (Default: `64`) |
+| `GLOBAL_ROUTER` | Specifies which global router to use. Values: `fastroute` or `cugr`. <br> (Default: `fastroute`) |
+| `DETAILED_ROUTER` | Specifies which detailed router to use. Values: `tritonroute`, `tritonroute_or`, or `drcu`. <br> (Default: `tritonroute`) |
+
+### Magic
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `MAGIC_PAD` |  A flag to pad the views generated by magic (.mag, .lef, .gds) with one site. 1 = Enabled, 0 = Disabled <br> (Default: `0` )|
+| `MAGIC_ZEROIZE_ORIGIN` | A flag to move the layout such that it's origin in the lef generated by magic is 0,0. 1 = Enabled, 0 = Disabled  <br> (Default: `1` )|
+| `MAGIC_GENERATE_GDS` | A flag to generate gds view via magic . 1 = Enabled, 0 = Disabled  <br> (Default: `1` )|
+| `MAGIC_GENERATE_LEF` | A flag to generate lef view via magic . 1 = Enabled, 0 = Disabled  <br> (Default: `1` )|
+| `MAGIC_GENERATE_MAGLEF` | A flag to generate maglef view via magic . 1 = Enabled, 0 = Disabled  <br> (Default: `1` )|
+| `MAGIC_WRITE_FULL_LEF` | A flag to specify whether or not the output LEF should include all shapes inside the macro or an abstracted view of the macro lef view via magic . 1 = Full View, 0 = Abstracted View  <br> (Default: `0` )|
+| `MAGIC_DRC_USE_GDS` | A flag to choose whether to run the magic DRC checks on GDS or not. If not, then the checks will be done on the DEF/LEF. 1 = GDS, 0 = DEF/LEF  <br> (Default: `1` )|
+| `MAGIC_EXT_USE_GDS` | A flag to choose whether to run the magic extractions on GDS or DEF/LEF. If GDS was used Device Level LVS will be run. Otherwise, blackbox LVS will be run. 1 = GDS, 0 = DEF/LEF  <br> (Default: `0` )|
+| `MAGIC_INCLUDE_GDS_POINTERS` | A flag to choose whether to include GDS pointers in the generated mag files or not. 1 = Enabled, 0 = Disabled  <br> (Default: `0` )|
+| `MAGIC_DISABLE_HIER_GDS` | A flag to disable cif hier and array during GDS-II writing.* 1=Enabled `<so this hier gds will be disabled>`, 0=Disabled `<so this hier gds will be enabled>`. <br> (Default: `1` )|
+
+> * Tim Edwards's Explanation on disabling hier gds: The following is an explanation by Tim Edwards, provided in a slack thread, on how this affects the GDS writing process: "Magic can take a very long time writing out GDS while checking hierarchical interactions in a standard cell layout. If your design is all digital, I recommend using "gds *hier write disable" before "gds write" so that it does not try to resolve hierarchical interactions (since by definition, standard cells are designed to just sit next to each other without creating DRC issues).  That can actually make the difference between a 20 hour GDS write and a 2 minute GDS write.  For a standard cell design that takes up the majority of the user space, a > 24 hour write time (without disabling the hierarchy checks) would not surprise me."
+
+### LVS
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `LVS_INSERT_POWER_PINS` |  Enables power pins insertion before running lvs. 1 = Enabled, 0 = Disabled <br> (Default: `1` )|
+| `LVS_CONNECT_BY_LABEL` | Enables connections by label in LVS by skipping `extract unique` in magic extractions. <br> Default: `0` |
+| `YOSYS_REWRITE_VERILOG` | Enables yosys to rewrite the verilog before LVS producing a canonical verilog netlist with verbose wire declarations. This flag will be ignored if `LEC_ENABLE` is 1, and it will be rewritten anyways. 1 = Enabled, 0 = Disabled <br> (Default: `0` ) |
+
+### Misc
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `PDK` | Specifies the process design kit (PDK). <br> (Default: `sky130A` )|
+| `STD_CELL_LIBRARY` | Specifies the standard cell library to be used under the specified PDK. <br> (Default: `sky130_fd_sc_hd` )|
+| `PDK_ROOT` | Specifies the folder path of the PDK. It searches for a `config.tcl` in `$PDK_ROOT/$PDK/libs.tech/openlane/` directory and at least have one standard cell library config defined in `$PDK_ROOT/$PDK/libs.tech/openlane/$STD_CELL_LIBRARY`. |
+| `CELL_PAD` | Cell padding; increases the width of cells. <br> (Default: `4` microns -- 4 sites)|
+| `DIODE_PADDING` | Diode cell padding; increases the width of diode cells during placement checks. <br> (Default: `2` microns -- 2 sites)|
+| `WIRE_RC_LAYER` | The metal layer used in estimate parastics `set_wire_rc`. Should be moved to PDK configurations later.. <br> Default: `met1`.|
+| `MERGED_LEF_UNPADDED` | Points to `merged_unpadded.lef` by default. it contains the technology LEF for the used STD_CELL_LIBRARY merged with the LEF file for all the cells. |
+| `MERGED_LEF` | points to `merged.lef`, which is `merged_unpadded.lef` but with cell padding. This is controlled by CELL_PAD. |
+| `NO_SYNTH_CELL_LIST` | Specifies the file that contains the don't-use-cell-list to be excluded from the liberty file during synthesis. If it's not defined, this path is searched `$::env(PDK_ROOT)/$::env(PDK)/libs.tech/openlane/$::env(STD_CELL_LIBRARY)/no_synth.cells` and if it's not found, then the original liberty will be used as is. |
+| `DRC_EXCLUDE_CELL_LIST` | Specifies the file that contains the don't-use-cell-list to be excluded from the liberty file during synthesis and timing optimizations. If it's not defined, this path is searched `$::env(PDK_ROOT)/$::env(PDK)/libs.tech/openlane/$::env(STD_CELL_LIBRARY)/drc_exclude.cells` and if it's not found, then the original liberty will be used as is. In other words, `DRC_EXCLUDE_CELL_LIST` contain the only excluded cell list in timing optimizations. |
+
+### Flow control
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `USE_GPIO_PADS` | Decides whether or not to use the gpio pads in routing by merging their LEF file set in `::env(USE_GPIO_ROUTING_LEF)` and blackboxing their verilog modules set in `::env(GPIO_PADS_VERILOG)`. 1=Enabled, 0=Disabled. <br> (Default: `0`) |
+| `LEC_ENABLE` | Enables logic verification using yosys, for comparing each netlist at each stage of the flow with the previous netlist and verifying that they are logically equivalent. Warning: this will increase the runtime significantly. 1 = Enabled, 0 = Disabled <br> (Default: `0`)|
+| `RUN_ROUTING_DETAILED` | Enables detailed routing. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `RUN_MAGIC` | Enables running magic and GDSII streaming. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `RUN_KLAYOUT` | Enables running Klayout and GDSII streaming. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `RUN_KLAYOUT_DRC` | Enables running Klayout DRC on GDS-II produced by magic. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `KLAYOUT_DRC_KLAYOUT_GDS` | Enables running Klayout DRC on GDS-II produced by Klayout. 1 = Enabled, 0 = Disabled <br> (Default: `0`)|
+| `RUN_KLAYOUT_XOR` | Enables running Klayout XOR on 2 GDS-IIs, the defaults are the one produced by magic vs the one produced by klayout. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `KLAYOUT_XOR_GDS` | If `RUN_KLAYOUT_XOR` is enabled, this will enable producing a GDS output from the XOR along with it's PNG export. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `KLAYOUT_XOR_XML` | If `RUN_KLAYOUT_XOR` is enabled, this will enable producing an XML output from the XOR. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `TAKE_LAYOUT_SCROT` | Enables running Klayout to take a PNG screenshot of the produced layout (currently configured to run on the results of each stage).1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `RUN_SIMPLE_CTS` | Enables inserting simple clock tree after synthesis .1 = Enabled, 0 = Disabled <br> (Default: `0`)|
+| `FILL_INSERTION` | Enables fill cells insertion after cts (if enabled) .1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `TAP_DECAP_INSERTION` | Enables tap and decap cells insertion after floorplanning (if enabled) .1 = Enabled, 0 = Disabled <br> (Default: `1`) |
+| `DIODE_INSERTION_STRATEGY` | Specifies the insertion strategy of diodes to be used in the flow. 0 = No diode insertion, 1 = Spray diodes, 2 = insert fake diodes and replace them with real diodes if needed. 3= use FastRoute Antenna Avoidance flow, 4 = Use Sylvian's Custom Script for diode insertion on design pins and smartly inserting needed diodes inside the design, 5 = a mix of strategy 2 and 4. <br> (Default: `3`) |
+| `WIDEN_SITE` | Specifies the new virtual width of the site to be used in all stages up to diode insertion, then switched back to the original site width. It can be either a factor or an absolute value controlled by `WIDEN_SITE_IS_FACTOR` <br> (Default: `1`) |
+| `WIDEN_SITE_IS_FACTOR` | Specifies whether the given `WIDEN_SITE` should be treated as a factor or an absolute value. 0 = absolute, 1 = factor <br> (Default: `1`) |
+| `USE_ARC_ANTENNA_CHECK` | Specifies whether to use the openroad ARC antenna checker or magic antenna checker. 0=magic antenna checker, 1=ARC OR antenna checker <br> (Default: `1`)
+| `RUN_SPEF_EXTRACTION` | Specifies whether or not to run SPEF extraction on the routed DEF. 1=enabled 0=disabled <br> Default: `1` |
+| `SPEF_WIRE_MODEL` | Specifies the wire model used in SPEF extraction. Options are `L` or `Pi`  <br> Default: `L` |
+| `SPEF_EDGE_CAP_FACTOR` | Specifies the edge capacitance factor used in SPEF extraction. Ranges from 0 to 1 <br> Default: `1` |
+| `GENERATE_FINAL_SUMMARY_REPORT` | Specifies whether or not to generate a final summary report after the run is completed. Check command `generate_final_summary_report`. 1=enabled 0=disabled <br> Default: `1` |
+| `MAGIC_CONVERT_DRC_TO_RDB` | Specifies whether or not generate a Calibre RDB out of the magic.drc report. Result is saved in `<run_path>/results/magic/`. 1=enabled 0=disabled <br> Default: `1`|
+| `RUN_CVC` | Runs CVC on the output spice, which is a Circuit Validity Checker. Voltage aware ERC checker for CDL netlists. Thus, it controls the command `run_lef_cvc`. 1=Enabled, 0=Disabled. <br> Default: `1` |
+
+### Checkers
+
+| Variable      | Description                                                   |
+|---------------|---------------------------------------------------------------|
+| `CHECK_UNMAPPED_CELLS` | Checks if there are unmapped cells after synthesis and aborts if any was found. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `CHECK_ASSIGN_STATEMENTS` | Checks for assign statement in the generated gate level netlist and aborts of any was found.1 = Enabled, 0 = Disabled <br> (Default: `0`)|
+| `QUIT_ON_TR_DRC` | Checks for DRC violations after routing and exits the flow if any was found. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `QUIT_ON_MAGIC_DRC` | Checks for DRC violations after magic DRC is executed and exits the flow if any was found. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `QUIT_ON_ILLEGAL_OVERLAPS` | Checks for illegal overlaps during magic extraction. In some cases, these imply existing undetected shorts in the design. It also exits the flow if any was found. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+| `QUIT_ON_LVS_ERROR` | Checks for LVS errors after netgen LVS is executed and exits the flow if any was found. 1 = Enabled, 0 = Disabled <br> (Default: `1`)|
+
+
+[0]: ./../designs/spm/pin_order.cfg
